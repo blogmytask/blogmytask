@@ -4,7 +4,60 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Number Extractor</title>
-    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 100px;
+            margin-bottom: 10px;
+            resize: vertical;
+        }
+
+        button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            background: #f4f4f4;
+            margin: 5px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+
+        @media (max-width: 600px) {
+            textarea {
+                height: 200px;
+            }
+
+            button {
+                width: 100%;
+                margin-bottom: 15px;
+            }
+
+            ul {
+                padding: 0 10px;
+            }
+        }
+    </style>
 </head>
 <body>
     <h1>Extract Numbers</h1>
@@ -16,6 +69,57 @@
     <button id="convertButton" onclick="convertSlashes()" style="display: none;">Convert '/' to '|'</button>
     <button id="addYearButton" onclick="addYearPrefix()" style="display: none;">Convert to 20xx</button>
     <button id="copyButton" onclick="copyToClipboard()" style="display: none;">Copy to Clipboard</button>
-    <script src="script.js"></script>
+    <script>
+        function extractNumbers() {
+            const inputText = document.getElementById('inputText').value;
+            const regex = /\b\d{16}\|\d{2}[\/|]\d{4}\|\d{3}\b|\b\d{16}\|\d{2}[\/|]\d{2}\|\d{3}\b/g;
+            const matches = inputText.match(regex);
+            const numberList = document.getElementById('numberList');
+            const convertButton = document.getElementById('convertButton');
+            const addYearButton = document.getElementById('addYearButton');
+            const copyButton = document.getElementById('copyButton');
+            numberList.innerHTML = '';
+
+            if (matches) {
+                matches.forEach(number => {
+                    const li = document.createElement('li');
+                    li.textContent = number;
+                    numberList.appendChild(li);
+                });
+                convertButton.style.display = 'inline-block';
+                addYearButton.style.display = 'inline-block';
+                copyButton.style.display = 'inline-block';
+            } else {
+                numberList.innerHTML = '<li>No numbers found</li>';
+                convertButton.style.display = 'none';
+                addYearButton.style.display = 'none';
+                copyButton.style.display = 'none';
+            }
+        }
+
+        function convertSlashes() {
+            const listItems = document.querySelectorAll('#numberList li');
+            listItems.forEach(item => {
+                item.textContent = item.textContent.replace(/\//g, '|');
+            });
+        }
+
+        function addYearPrefix() {
+            const listItems = document.querySelectorAll('#numberList li');
+            listItems.forEach(item => {
+                item.textContent = item.textContent.replace(/(\|\d{2}\|)(\d{2})(\|\d{3}\b)/, '$1' + '20' + '$2' + '$3');
+            });
+        }
+
+        function copyToClipboard() {
+            const listItems = document.querySelectorAll('#numberList li');
+            const textToCopy = Array.from(listItems).map(item => item.textContent).join('\n');
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                alert('Copied to clipboard');
+            }).catch(err => {
+                alert('Failed to copy: ', err);
+            });
+        }
+    </script>
 </body>
 </html>
